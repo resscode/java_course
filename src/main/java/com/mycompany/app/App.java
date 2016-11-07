@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import stream.ZippedFileInputStream;
 
 /**
  * Hello world!
@@ -62,8 +63,8 @@ public class App {
             BufferedOutputStream dest = null;
             BufferedInputStream is = null;
             InputStream sourceIs = null;
-            ZipInputStream zipIs = new ZipInputStream(new FileInputStream(zipFile.getName()));
-            while (e.hasMoreElements()) {
+            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile.getName()));
+            while ((entry = zipInputStream.getNextEntry()) != null) {
                 entry = (ZipEntry) e.nextElement();
                 String entryName = entry.getName();
                 File file = new File(destinationFolder + File.separator + entryName);
@@ -82,9 +83,9 @@ public class App {
                         }
                     }
                 } else if (isZipFile(sourceIs)) {
-                        String fileWoExt = stripExtension(file.getAbsolutePath());
-                        System.out.println("Zip file " + entryName);
-                        unzipFunction(fileWoExt,new ZipInputStream( new CloseShieldInputStream(zipIs)));
+                //    String fileWoExt = stripExtension(file.getAbsolutePath());
+                    System.out.println("Zip file " + entryName);
+                    unzipFunction(destinationFolder, new ZippedFileInputStream(zipInputStream));
                 } else {
                     FileOutputStream fOutput = new FileOutputStream(file);
                     int count = 0;
@@ -97,19 +98,19 @@ public class App {
 //                        String fileWoExt = stripExtension(file.getAbsolutePath());
 //                        System.out.println("Zip file " + entryName);
 //                        unzipFunction(fileWoExt, new ZipFile(file));
-//                    }
-                    fOutput.close();
+//                    }                    
                 }
                 // close ZipEntry and take the next one
                 //is.close();
             }
+            zipInputStream.close();
             zipFile.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void unzipFunction(String destinationFolder, ZipInputStream zipInputStream) {
+    private static void unzipFunction(String destinationFolder, ZippedFileInputStream zipInputStream) {
         File directory = new File(destinationFolder);
 
         // if the output directory doesn't exist, create it
@@ -138,9 +139,9 @@ public class App {
                         }
                     }
                 } else if (isZipFile(zipInputStream)) {
-                        String fileWoExt = stripExtension(file.getAbsolutePath());
-                        System.out.println("Zip file " + entryName);
-                        unzipFunction(fileWoExt,zipInputStream);
+                    String fileWoExt = stripExtension(file.getAbsolutePath());
+                    System.out.println("Zip file " + entryName);
+                    unzipFunction(destinationFolder, new ZippedFileInputStream(zipInputStream.getZipInputStream()));
                 } else {
                     FileOutputStream fOutput = new FileOutputStream(file);
                     int count = 0;
@@ -151,9 +152,8 @@ public class App {
                     }
                     fOutput.close();
                 }
-                // close ZipEntry and take the next one
-                //zipInputStream.close();
             }
+            zipInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -190,12 +190,14 @@ public class App {
         in.close();
         return test == 0x504b0304;
     }
+
     public static boolean isZipFile(InputStream inputStream) throws IOException {
         DataInputStream in = new DataInputStream(inputStream);
         int test = in.readInt();
         in.close();
         return test == 0x504b0304;
     }
+
     public static boolean isZipFile(ZipInputStream zipInputStream) throws IOException {
         DataInputStream in = new DataInputStream(zipInputStream);
         int test = in.readInt();

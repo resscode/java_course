@@ -7,17 +7,31 @@ package stream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
  *
  * @author adovgobrod
  */
-public class ZippedFileInputStream extends InputStream  {
-    private ZipInputStream is;
+public class ZippedFileInputStream extends InputStream {
 
-    public ZippedFileInputStream(ZipInputStream is){
+    private ZipInputStream is;
+    
+    /**
+     * 
+     * @param is 
+     */
+    public ZippedFileInputStream(ZipInputStream is) {
         this.is = is;
+    }
+    
+    /**
+     * 
+     * @return ZipInputStream
+     */
+    public ZipInputStream getZipInputStream() {
+        return this.is;
     }
 
     @Override
@@ -28,5 +42,14 @@ public class ZippedFileInputStream extends InputStream  {
     @Override
     public void close() throws IOException {
         is.closeEntry();
+    }
+    
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
+    public ZipEntry getNextEntry() throws IOException {
+        return is.getNextEntry();
     }
 }
