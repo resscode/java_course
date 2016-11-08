@@ -6,8 +6,10 @@
 package Archive;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import stream.ZippedFileInputStream;
 
 /**
  *
@@ -15,20 +17,25 @@ import java.util.zip.ZipInputStream;
  */
 public class ZipArchiveStream implements ArchiveStream {
 
-    private ZipInputStreamStream zipInputStream;
+    private ZipInputStream zipInputStream;
+    private ZippedFileInputStream zippedFileInputStream;
     private ZipFile zipFile;
 
-    public ZipArchiveStream(ZipInputStreamStream zipInputStream) {
+    public ZipArchiveStream(ZipInputStream zipInputStream) {
         this.zipInputStream = zipInputStream;
     }
 
-    public ZipArchiveStream(ZipFile zipFile) {
+    public ZipArchiveStream(ZippedFileInputStream zippedFileInputStream) {
+        this.zipInputStream = zippedFileInputStream.getZipInputStream();
+    }
+
+    public ZipArchiveStream(ZipFile zipFile) throws FileNotFoundException {
         this.zipFile = zipFile;
         ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile.getName()));
         this.zipInputStream = zipInputStream;
     }
 
-    public ZipInputStreamStream getZipInputStream() {
+    public ZipInputStream getZipInputStream() {
         return zipInputStream;
     }
 
