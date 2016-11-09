@@ -18,9 +18,11 @@ import java.util.zip.ZipEntry;
  */
 public class ZipUnzipper implements Unzipper {
 
-    private ZipArchiveStream zipArchiveStream;
+    private final ZipUnArchiveStream zipUnArchiveStream;
+    private final ZipArchiveStream zipArchiveStream;
 
-    public ZipUnzipper(ZipArchiveStream zipArchiveStream) {
+    public ZipUnzipper(ZipUnArchiveStream zipUnArchiveStream, ZipArchiveStream zipArchiveStream) {
+        this.zipUnArchiveStream = zipUnArchiveStream;
         this.zipArchiveStream = zipArchiveStream;
     }
 
@@ -36,13 +38,13 @@ public class ZipUnzipper implements Unzipper {
         byte[] buffer = new byte[2048];
 
         try {
-            ZipArchiveStream zipInputStream = this.zipArchiveStream;
+            ZipUnArchiveStream zipInputStream = this.zipUnArchiveStream;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 String entryName = entry.getName();
                 File file = new File(destinationFolder + File.separator + entryName);
                 System.out.println("Unzip file " + entryName + " to " + file.getAbsolutePath());
-
+                this.zipArchiveStream.putNextEntry(entry);
                 // create the directories of the zip directory
                 if (entry.isDirectory()) {
                     File newDir = new File(file.getAbsolutePath());
@@ -55,8 +57,9 @@ public class ZipUnzipper implements Unzipper {
                 } else if (zipInputStream.isZipFile(entry)) {
                     String fileWoExt = stripExtension(file.getAbsolutePath());
                     System.out.println("Zip file " + entryName);
-                    ZipArchiveStream zipArchiveStream = new ZipArchiveStream(zipInputStream);
-                    ZipUnzipper zipUnzipper = new ZipUnzipper(zipArchiveStream);
+                    ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(zipInputStream);
+                    ZipArchiveStream zipArchiveStream = new ZipArchiveStream();
+                    ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream);
                     zipUnzipper.unzip(fileWoExt);
                 } else {
                     FileOutputStream fOutput = new FileOutputStream(file);
@@ -69,7 +72,8 @@ public class ZipUnzipper implements Unzipper {
                     fOutput.close();
                 }
             }
-           // zipInputStream.close();
+            this.zipArchiveStream.close();
+            // zipInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
             return false;

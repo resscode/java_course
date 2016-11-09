@@ -1,6 +1,7 @@
 package com.mycompany.app;
 
 import com.mycompany.archive.ZipArchiveStream;
+import com.mycompany.archive.ZipUnArchiveStream;
 import com.mycompany.archive.ZipUnzipper;
 import java.util.zip.ZipFile;
 
@@ -11,6 +12,7 @@ import java.util.zip.ZipFile;
 public class App {
 
     private static final String INPUT_ZIP_FILE = "D:\\inputs.zip";
+    private static final String OUTPUT_ZIP_FILE = "D:\\output.zip";
     private static final String OUTPUT_FOLDER = "D:\\outputzip";
 
     public static void main(String[] args) {
@@ -24,8 +26,9 @@ public class App {
                 destinationFolder = args[1];
 
             } else if (zipFile != null && destinationFolder != null) {
-                ZipArchiveStream zipArchiveStream = new ZipArchiveStream(new ZipFile(zipFile));
-                ZipUnzipper zipUnzipper = new ZipUnzipper(zipArchiveStream);
+                ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(new ZipFile(zipFile));
+                ZipArchiveStream zipArchiveStream = new ZipArchiveStream(OUTPUT_ZIP_FILE);
+                ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream);
                 zipUnzipper.unzip(destinationFolder);
             }
         } catch (Exception e) {
