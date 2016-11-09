@@ -5,10 +5,15 @@
  */
 package com.mycompany.archive;
 
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+
+
 /**
  *
  * @author adovgobrod
  */
 public interface ArchiveStream {
-    
+     public int read(byte[] bytes) throws IOException;
+     public void close() throws IOException;
 }

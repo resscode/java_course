@@ -10,5 +10,6 @@ package com.mycompany.archive;
  * @author adovgobrod
  */
 public interface Unzipper {
-    
+
+    public boolean unzip(String destinationFolder);
 }

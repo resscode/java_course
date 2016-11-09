@@ -5,26 +5,22 @@
  */
 package com.mycompany.archive;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import stream.ZippedFileInputStream;
 
 /**
  *
  * @author adovgobrod
  */
 public class ZipUnzipper implements Unzipper {
+
     private ZipArchiveStream zipArchiveStream;
-    public ZipUnzipper(ZipArchiveStream zipArchiveStream){
+
+    public ZipUnzipper(ZipArchiveStream zipArchiveStream) {
         this.zipArchiveStream = zipArchiveStream;
     }
 
@@ -40,7 +36,7 @@ public class ZipUnzipper implements Unzipper {
         byte[] buffer = new byte[2048];
 
         try {
-            ZipInputStream zipInputStream = zipArchiveStream.getZipInputStream();
+            ZipArchiveStream zipInputStream = this.zipArchiveStream;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 String entryName = entry.getName();
@@ -56,10 +52,10 @@ public class ZipUnzipper implements Unzipper {
                             System.out.println("Problem creating Folder");
                         }
                     }
-                } else if (isZipFile(zipInputStream)) {
+                } else if (zipInputStream.isZipFile()) {
                     String fileWoExt = stripExtension(file.getAbsolutePath());
                     System.out.println("Zip file " + entryName);
-                    ZipArchiveStream zipArchiveStream = new ZipArchiveStream(new ZippedFileInputStream(zipInputStream));
+                    ZipArchiveStream zipArchiveStream = new ZipArchiveStream(zipInputStream);
                     ZipUnzipper zipUnzipper = new ZipUnzipper(zipArchiveStream);
                     zipUnzipper.unzip(fileWoExt);
                 } else {
@@ -79,62 +75,6 @@ public class ZipUnzipper implements Unzipper {
             return false;
         }
         return true;
-    }
-    
-    /**
-     *
-     * @param file
-     * @return boolean
-     * @throws IOException
-     */
-    public static boolean isZipFile(File file) throws IOException {
-        if (file.isDirectory()) {
-            return false;
-        }
-        if (!file.canRead()) {
-            throw new IOException("Cannot read file " + file.getAbsolutePath());
-        }
-        if (file.length() < 4) {
-            return false;
-        }
-        DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-        int test = in.readInt();
-        in.close();
-        return test == 0x504b0304;
-    }
-
-    /**
-     * Determine whether a file is a ZIP File.
-     */
-    public static boolean isZipFile(FileInputStream fileStream) throws IOException {
-        DataInputStream in = new DataInputStream(new BufferedInputStream(fileStream));
-        int test = in.readInt();
-        in.close();
-        return test == 0x504b0304;
-    }
-
-    public static boolean isZipFile(InputStream inputStream) throws IOException {
-        DataInputStream in = new DataInputStream(inputStream);
-        int test = in.readInt();
-        in.close();
-        return test == 0x504b0304;
-    }
-
-    public static boolean isZipFile(ZipInputStream zipInputStream) throws IOException {
-        DataInputStream in = new DataInputStream(zipInputStream);
-        int test = in.readInt();
-        in.close();
-        return test == 0x504b0304;
-    }
-
-    /**
-     * Determine whether a file is a ZIP File.
-     */
-    public static boolean isZipFile(BufferedInputStream inputStream) throws IOException {
-        DataInputStream in = new DataInputStream(inputStream);
-        int test = in.readInt();
-        in.close();
-        return test == 0x504b0304;
     }
 
     public static String stripFileName(String absolutePath) {

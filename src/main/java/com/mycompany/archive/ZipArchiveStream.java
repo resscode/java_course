@@ -5,11 +5,13 @@
  */
 package com.mycompany.archive;
 
+import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-import stream.ZippedFileInputStream;
+import com.mycompany.stream.ZippedFileInputStream;
 
 /**
  *
@@ -17,30 +19,44 @@ import stream.ZippedFileInputStream;
  */
 public class ZipArchiveStream implements ArchiveStream {
 
-    private ZipInputStream zipInputStream;
     private ZippedFileInputStream zippedFileInputStream;
     private ZipFile zipFile;
 
-    public ZipArchiveStream(ZipInputStream zipInputStream) {
-        this.zipInputStream = zipInputStream;
-    }
-
-    public ZipArchiveStream(ZippedFileInputStream zippedFileInputStream) {
-        this.zipInputStream = zippedFileInputStream.getZipInputStream();
+    public ZipArchiveStream(ZipArchiveStream zipArchiveStream) {
+        this.zippedFileInputStream = new ZippedFileInputStream(zipArchiveStream.getZippedFileInputStream());
     }
 
     public ZipArchiveStream(ZipFile zipFile) throws FileNotFoundException {
         this.zipFile = zipFile;
-        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile.getName()));
-        this.zipInputStream = zipInputStream;
+//        this.zipInputStream = new ZipInputStream();
+        this.zippedFileInputStream = new ZippedFileInputStream(new FileInputStream(zipFile.getName()));
     }
 
-    public ZipInputStream getZipInputStream() {
-        return zipInputStream;
+    public ZippedFileInputStream getZippedFileInputStream() {
+        return this.zippedFileInputStream;
+    }
+
+    public boolean isZipFile() throws IOException {
+        DataInputStream in = new DataInputStream(this.zippedFileInputStream);
+        int test = in.readInt();
+        in.close();
+        return test == 0x504b0304;
     }
 
     public ZipFile getZipFile() {
-        return zipFile;
+        return this.zipFile;
     }
-    
+
+    public ZipEntry getNextEntry() throws IOException {
+        return this.zippedFileInputStream.getNextEntry();
+    }
+
+    public int read(byte[] bytes) throws IOException {
+        return this.zippedFileInputStream.read(bytes);
+    }
+
+    public void close() throws IOException {
+        this.zippedFileInputStream.superClose();
+    }
+
 }
