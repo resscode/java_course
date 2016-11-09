@@ -52,7 +52,7 @@ public class ZipUnzipper implements Unzipper {
                             System.out.println("Problem creating Folder");
                         }
                     }
-                } else if (zipInputStream.isZipFile()) {
+                } else if (zipInputStream.isZipFile(entry)) {
                     String fileWoExt = stripExtension(file.getAbsolutePath());
                     System.out.println("Zip file " + entryName);
                     ZipArchiveStream zipArchiveStream = new ZipArchiveStream(zipInputStream);
@@ -69,7 +69,7 @@ public class ZipUnzipper implements Unzipper {
                     fOutput.close();
                 }
             }
-            zipInputStream.close();
+           // zipInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
