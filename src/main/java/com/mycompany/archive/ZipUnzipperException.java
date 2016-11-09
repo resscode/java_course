@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Archive;
+package com.mycompany.archive;
 
 /**
  *
  * @author adovgobrod
  */
-public interface UnzipperException {
+public class ZipUnzipperException {
     
 }

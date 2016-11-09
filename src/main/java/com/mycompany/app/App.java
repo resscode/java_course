@@ -1,7 +1,7 @@
 package com.mycompany.app;
 
-import Archive.ZipArchiveStream;
-import Archive.ZipUnzipper;
+import com.mycompany.archive.ZipArchiveStream;
+import com.mycompany.archive.ZipUnzipper;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import java.io.File;
 import java.util.zip.ZipInputStream;
