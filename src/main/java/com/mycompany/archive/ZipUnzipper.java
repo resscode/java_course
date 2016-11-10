@@ -5,6 +5,8 @@
  */
 package com.mycompany.archive;
 
+import com.mycompany.parser.ByteParser;
+import com.mycompany.parser.ScanerParser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -73,20 +75,26 @@ public class ZipUnzipper implements Unzipper {
                     this.zipArchiveStream.write(zipArchiveStream.getByteArrayOutputStreamBytes());
                     this.zipArchiveStream.closeEntry();
                 } else {
-                    this.zipArchiveStream.putNextEntry(entry);
+                    this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
                     FileOutputStream fOutput = new FileOutputStream(file);
                     int count = 0;
                     //sourceIs = clone is;
-                    while ((count = zipInputStream.read(buffer)) > 0) {
-                        // write 'count' bytes to the file output stream
-                        fOutput.write(buffer, 0, count);
-                        this.zipArchiveStream.write(buffer, 0, count);
-                    }
+                    ScanerParser scanerParser = new ScanerParser(zipInputStream.getZipInputStream());
+                    fOutput.write(scanerParser.getBytes());
+                    this.zipArchiveStream.write(scanerParser.getBytes());
+//                    while ((count = zipInputStream.read(buffer)) > 0) {
+//                        // Change Bytes here
+//                        ByteParser byteParser = new ByteParser(buffer);
+//                        buffer = byteParser.getBytes();
+//                        // write 'count' bytes to the file output stream
+//                        fOutput.write(buffer, 0, count);
+//                        this.zipArchiveStream.write(buffer, 0, (count < buffer.length) ? count : buffer.length);
+//                    }
                     this.zipArchiveStream.closeEntry();
                     fOutput.close();
                 }
                 }catch(ZipException ex){
-                    // ex.printStackTrace();
+                    ex.printStackTrace();
                 }
             }
             //this.zipArchiveStream.close();
