@@ -10,7 +10,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 /**
  *
@@ -25,8 +28,10 @@ public class ZipUnzipper implements Unzipper {
         this.zipUnArchiveStream = zipUnArchiveStream;
         this.zipArchiveStream = zipArchiveStream;
     }
-
-    public boolean unzip(String destinationFolder) {
+    public void closeZip() throws IOException{
+        this.zipArchiveStream.close();
+    }
+    public boolean unzip(String destinationFolder ) {
         File directory = new File(destinationFolder);
 
         // if the output directory doesn't exist, create it
@@ -41,12 +46,14 @@ public class ZipUnzipper implements Unzipper {
             ZipUnArchiveStream zipInputStream = this.zipUnArchiveStream;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
+                try{
                 String entryName = entry.getName();
                 File file = new File(destinationFolder + File.separator + entryName);
                 System.out.println("Unzip file " + entryName + " to " + file.getAbsolutePath());
-                this.zipArchiveStream.putNextEntry(entry);
                 // create the directories of the zip directory
                 if (entry.isDirectory()) {
+                    this.zipArchiveStream.putNextEntry(entry);
+                    this.zipArchiveStream.closeEntry();
                     File newDir = new File(file.getAbsolutePath());
                     if (!newDir.exists()) {
                         boolean success = newDir.mkdirs();
@@ -61,23 +68,38 @@ public class ZipUnzipper implements Unzipper {
                     ZipArchiveStream zipArchiveStream = new ZipArchiveStream();
                     ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream);
                     zipUnzipper.unzip(fileWoExt);
+                    this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
+                    zipArchiveStream.close();
+                    this.zipArchiveStream.write(zipArchiveStream.getByteArrayOutputStreamBytes());
+                    this.zipArchiveStream.closeEntry();
                 } else {
+                    this.zipArchiveStream.putNextEntry(entry);
                     FileOutputStream fOutput = new FileOutputStream(file);
                     int count = 0;
                     //sourceIs = clone is;
                     while ((count = zipInputStream.read(buffer)) > 0) {
                         // write 'count' bytes to the file output stream
                         fOutput.write(buffer, 0, count);
+                        this.zipArchiveStream.write(buffer, 0, count);
                     }
+                    this.zipArchiveStream.closeEntry();
                     fOutput.close();
                 }
+                }catch(ZipException ex){
+                    // ex.printStackTrace();
+                }
             }
-            this.zipArchiveStream.close();
+            //this.zipArchiveStream.close();
             // zipInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
+//        try {
+//            this.zipArchiveStream.close();
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//            return false;
+//        }
         return true;
     }
 

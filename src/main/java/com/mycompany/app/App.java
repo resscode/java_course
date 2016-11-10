@@ -30,6 +30,7 @@ public class App {
                 ZipArchiveStream zipArchiveStream = new ZipArchiveStream(OUTPUT_ZIP_FILE);
                 ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream);
                 zipUnzipper.unzip(destinationFolder);
+                zipUnzipper.closeZip();
             }
         } catch (Exception e) {
             e.printStackTrace();
