@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
 public class Regexp {
 
     private String line = "   +1 (4542) 114214 111@111.org		d@ghhg.com,,,,, abc@kjkj.org";
-    private String pattern = "^[+\\s]+([0-9]+)([(\\s]+)([0-9\\s]+)([)])([0-9\\s]+)";
+    private String pattern = "(?<phone>^([+\\s]+)([\\d\\s()]+)[\\s])(?<emails>.*)";
+    private String patternEmail = "([a-z0-9_\\.-]+)@([a-z0-9_\\.-]+)\\.([a-z\\.]{2,6})";
     private String message;
     private boolean answer = false;
 
@@ -25,6 +26,12 @@ public class Regexp {
         List<String> allMatches = new ArrayList<String>();
         Matcher m = Pattern.compile(pattern).matcher(line);
         while (m.find()) {
+            String emails = m.group("emails");
+            Matcher e = Pattern.compile(patternEmail).matcher(emails);
+            while(e.find()){
+                System.out.println(e.group());
+            }
+            System.out.println(m.group("phone"));
             System.out.print(m.group());
             allMatches.add(m.group());
         }

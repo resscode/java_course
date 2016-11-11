@@ -5,11 +5,8 @@
  */
 package com.mycompany.parser;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -20,9 +17,11 @@ import java.util.zip.ZipInputStream;
  */
 public class ScanerParser {
 
+    private static final String REGEXP_PHONE = "(?<phone>^([+\\s]+)([\\d\\s()]+)[\\s])(?<emails>.*)";
+    private static final String REGEXP_EMAIL = "([a-z0-9_\\.-]+)@([a-z0-9_\\.-]+)\\.([a-z\\.]{2,6})";
     private List<Replace> phonesReplaceList;
-    private List<String> phones;
-    private List<String> emails;
+    private List<String> phonesList;
+    private List<String> emailsList;
     private Scanner scanner;
     private byte[] bytes;
 
@@ -46,25 +45,18 @@ public class ScanerParser {
     }
 
     private void parseEmails(String line) {
-        String pattern = "([+\\s]+)([0-9]+)([(\\s]+)([0-9\\s]+)([)])([0-9\\s]+)";
-        List<String> allMatches = new ArrayList<String>();
-        Matcher m = Pattern.compile(pattern).matcher(line);
+        Matcher m = Pattern.compile(REGEXP_EMAIL).matcher(line);
         while (m.find()) {
-            System.out.print(m.group());
-            allMatches.add(m.group());
+            this.emailsList.add(m.group());
         }
-        this.emails = allMatches;
     }
 
-    private void parsePhone(String line) {
-        String pattern = "([+\\s]+)([0-9]+)([(\\s]+)([0-9\\s]+)([)])([0-9\\s]+)";
-        List<String> allMatches = new ArrayList<String>();
-        Matcher m = Pattern.compile(pattern).matcher(line);
+    private void parsePhoneEmails(String line) {
+        Matcher m = Pattern.compile(REGEXP_PHONE).matcher(line);
         while (m.find()) {
-            System.out.print(m.group());
-            allMatches.add(m.group());
+            this.parseEmails(m.group("emails"));
+            this.phonesList.add(m.group("phone"));
         }
-        this.phones = allMatches;
     }
 
     public byte[] getBytes() {
@@ -75,8 +67,7 @@ public class ScanerParser {
         String s = new String();
         while (this.scanner.hasNextLine()) {
             String line = this.scanner.nextLine();
-            this.parseEmails(line);
-            this.parsePhone(line);
+            this.parsePhoneEmails(line);
             s += this.replace(line);
         }
         this.bytes = s.getBytes();
