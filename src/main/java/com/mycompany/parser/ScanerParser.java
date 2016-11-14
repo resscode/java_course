@@ -5,6 +5,7 @@
  */
 package com.mycompany.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -20,7 +21,7 @@ public class ScanerParser {
 
     private static final String REGEXP_PHONE = "(?<phone>^([+\\s]+)([\\d\\s()]+)[\\s])(?<emails>.*)";
     private static final String REGEXP_EMAIL = "([a-z0-9_\\.-]+)@([a-z0-9_\\.-]+)\\.([a-z\\.]{2,6})";
-    private List<Replace> phonesReplaceList;
+    private ArrayList<Replace> phonesReplaceList;
     private Set<String> phonesList;
     private Set<String> emailsList;
     private Scanner scanner;
@@ -30,6 +31,7 @@ public class ScanerParser {
     }
     
     private void initReplaceList() {
+        this.phonesReplaceList = new ArrayList<Replace>();
         this.phonesReplaceList.add(new Replace("(101)", "(401)"));
         this.phonesReplaceList.add(new Replace("(202)", "(802)"));
         this.phonesReplaceList.add(new Replace("(301)", "(321)"));
