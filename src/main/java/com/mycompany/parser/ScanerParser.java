@@ -7,6 +7,7 @@ package com.mycompany.parser;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -20,17 +21,14 @@ public class ScanerParser {
     private static final String REGEXP_PHONE = "(?<phone>^([+\\s]+)([\\d\\s()]+)[\\s])(?<emails>.*)";
     private static final String REGEXP_EMAIL = "([a-z0-9_\\.-]+)@([a-z0-9_\\.-]+)\\.([a-z\\.]{2,6})";
     private List<Replace> phonesReplaceList;
-    private List<String> phonesList;
-    private List<String> emailsList;
+    private Set<String> phonesList;
+    private Set<String> emailsList;
     private Scanner scanner;
-    private byte[] bytes;
 
-    public ScanerParser(ZipInputStream zipInputStream) {
-        this.scanner = new Scanner(zipInputStream);
+    public ScanerParser() {
         this.initReplaceList();
-        this.changeBytes();
     }
-
+    
     private void initReplaceList() {
         this.phonesReplaceList.add(new Replace("(101)", "(401)"));
         this.phonesReplaceList.add(new Replace("(202)", "(802)"));
@@ -47,7 +45,7 @@ public class ScanerParser {
     private void parseEmails(String line) {
         Matcher m = Pattern.compile(REGEXP_EMAIL).matcher(line);
         while (m.find()) {
-            this.emailsList.add(m.group());
+            this.emailsList.add(parseValueBeforeList(m.group()));
         }
     }
 
@@ -55,22 +53,28 @@ public class ScanerParser {
         Matcher m = Pattern.compile(REGEXP_PHONE).matcher(line);
         while (m.find()) {
             this.parseEmails(m.group("emails"));
-            this.phonesList.add(m.group("phone"));
+            this.phonesList.add(parseValueBeforeList(m.group("phone")));
         }
     }
-
-    public byte[] getBytes() {
-        return bytes;
+    public static String parseValueBeforeList(String value) {
+        return value.replaceAll("\\s+","");
     }
 
-    public byte[] changeBytes() {
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public void setScanner(ZipInputStream zipInputStream) {
+        this.scanner = new Scanner(zipInputStream);
+    }
+
+    public byte[] changeReturnBytes() {
         String s = new String();
         while (this.scanner.hasNextLine()) {
             String line = this.scanner.nextLine();
             this.parsePhoneEmails(line);
             s += this.replace(line);
         }
-        this.bytes = s.getBytes();
-        return this.bytes;
+        return s.getBytes();
     }
 }

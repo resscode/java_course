@@ -3,6 +3,7 @@ package com.mycompany.app;
 import com.mycompany.archive.ZipArchiveStream;
 import com.mycompany.archive.ZipUnArchiveStream;
 import com.mycompany.archive.ZipUnzipper;
+import com.mycompany.parser.ScanerParser;
 import java.util.zip.ZipFile;
 
 /**
@@ -21,17 +22,15 @@ public class App {
         try {
             // take the arguments from the command line
             if (args.length == 2) {
-                
                 zipFile = args[0];
                 destinationFolder = args[1];
-
-            } else if (zipFile != null && destinationFolder != null) {
-                ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(new ZipFile(zipFile));
-                ZipArchiveStream zipArchiveStream = new ZipArchiveStream(OUTPUT_ZIP_FILE);
-                ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream);
-                zipUnzipper.unzip(destinationFolder);
-                zipUnzipper.closeZip();
             }
+            ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(new ZipFile(zipFile));
+            ZipArchiveStream zipArchiveStream = new ZipArchiveStream(OUTPUT_ZIP_FILE);
+            ScanerParser scanerParser = new ScanerParser();
+            ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream, scanerParser);
+            zipUnzipper.unzip(destinationFolder);
+            zipUnzipper.closeZip();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

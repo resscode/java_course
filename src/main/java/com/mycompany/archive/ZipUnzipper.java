@@ -25,10 +25,12 @@ public class ZipUnzipper implements Unzipper {
 
     private final ZipUnArchiveStream zipUnArchiveStream;
     private final ZipArchiveStream zipArchiveStream;
+    private final ScanerParser scanerParser;
 
-    public ZipUnzipper(ZipUnArchiveStream zipUnArchiveStream, ZipArchiveStream zipArchiveStream) {
+    public ZipUnzipper(ZipUnArchiveStream zipUnArchiveStream, ZipArchiveStream zipArchiveStream, ScanerParser scanerParser) {
         this.zipUnArchiveStream = zipUnArchiveStream;
         this.zipArchiveStream = zipArchiveStream;
+        this.scanerParser = scanerParser;
     }
     public void closeZip() throws IOException{
         this.zipArchiveStream.close();
@@ -68,7 +70,7 @@ public class ZipUnzipper implements Unzipper {
                     System.out.println("Zip file " + entryName);
                     ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(zipInputStream);
                     ZipArchiveStream zipArchiveStream = new ZipArchiveStream();
-                    ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream);
+                    ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream, this.scanerParser);
                     zipUnzipper.unzip(fileWoExt);
                     this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
                     zipArchiveStream.close();
@@ -79,9 +81,10 @@ public class ZipUnzipper implements Unzipper {
                     FileOutputStream fOutput = new FileOutputStream(file);
                     int count = 0;
                     //sourceIs = clone is;
-                    ScanerParser scanerParser = new ScanerParser(zipInputStream.getZipInputStream());
-                    fOutput.write(scanerParser.getBytes());
-                    this.zipArchiveStream.write(scanerParser.getBytes());
+                    this.scanerParser.setScanner(zipInputStream.getZipInputStream());
+                    byte[] bytesForWrite = scanerParser.changeReturnBytes();
+                    fOutput.write(bytesForWrite);
+                    this.zipArchiveStream.write(bytesForWrite);
 //                    while ((count = zipInputStream.read(buffer)) > 0) {
 //                        // Change Bytes here
 //                        ByteParser byteParser = new ByteParser(buffer);
