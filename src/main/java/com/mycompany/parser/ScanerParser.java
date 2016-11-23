@@ -22,12 +22,13 @@ public class ScanerParser {
     private static final String REGEXP_PHONE = "(?<phone>^([+\\s]+)([\\d\\s()]+)[\\s])(?<emails>.*)";
     private static final String REGEXP_EMAIL = "([a-z0-9_\\.-]+)@([a-z0-9_\\.-]+)\\.([a-z\\.]{2,6})";
     private ArrayList<Replace> phonesReplaceList;
-    private Set<String> phonesList;
-    private Set<String> emailsList;
+    private List<String> phonesList;
+    private List<String> emailsList;
     private Scanner scanner;
 
     public ScanerParser() {
         this.initReplaceList();
+        this.initLists();
     }
     
     private void initReplaceList() {
@@ -35,6 +36,10 @@ public class ScanerParser {
         this.phonesReplaceList.add(new Replace("(101)", "(401)"));
         this.phonesReplaceList.add(new Replace("(202)", "(802)"));
         this.phonesReplaceList.add(new Replace("(301)", "(321)"));
+    }
+    private void initLists() {
+        this.phonesList = new ArrayList<String>();
+        this.emailsList = new ArrayList<String>();
     }
 
     private String replace(String line) {
@@ -54,8 +59,12 @@ public class ScanerParser {
     private void parsePhoneEmails(String line) {
         Matcher m = Pattern.compile(REGEXP_PHONE).matcher(line);
         while (m.find()) {
-            this.parseEmails(m.group("emails"));
-            this.phonesList.add(parseValueBeforeList(m.group("phone")));
+            if (m.group("emails") != null){
+                this.parseEmails(m.group("emails"));
+            }
+            if (m.group("phone") != null){ 
+                this.phonesList.add(parseValueBeforeList(m.group("phone")));
+            }
         }
     }
     public static String parseValueBeforeList(String value) {
@@ -79,4 +88,13 @@ public class ScanerParser {
         }
         return s.getBytes();
     }
+
+    public List<String> getPhonesList() {
+        return phonesList;
+    }
+
+    public List<String> getEmailsList() {
+        return emailsList;
+    }
+    
 }

@@ -4,6 +4,8 @@ import com.mycompany.archive.ZipArchiveStream;
 import com.mycompany.archive.ZipUnArchiveStream;
 import com.mycompany.archive.ZipUnzipper;
 import com.mycompany.parser.ScanerParser;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.zip.ZipFile;
 
 /**
@@ -31,6 +33,8 @@ public class App {
             ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream, scanerParser);
             zipUnzipper.unzip(destinationFolder);
             zipUnzipper.closeZip();
+            Runnable r = (List<String> list) -> {};
+            for(String row : )
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
