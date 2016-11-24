@@ -46,11 +46,15 @@ public class ZipUnArchiveStream implements ArchiveStream {
     public ZipInputStream getZipInputStream() {
         return this.zipInputStream;
     }
-
+    // TODO move to Dfenition class
     public boolean isZipFile(ZipEntry entry) throws IOException {
         return entry.getName().toLowerCase().endsWith(".zip");
     }
 
+    public boolean isGZipFile(ZipEntry entry) throws IOException {
+        return entry.getName().toLowerCase().endsWith(".gz");
+    }
+    // END TODO
     public ZipFile getZipFile() {
         return this.zipFile;
     }

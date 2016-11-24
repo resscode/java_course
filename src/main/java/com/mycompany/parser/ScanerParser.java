@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -22,8 +23,8 @@ public class ScanerParser {
     private static final String REGEXP_PHONE = "(?<phone>^([+\\s]+)([\\d\\s()]+)[\\s])(?<emails>.*)";
     private static final String REGEXP_EMAIL = "([a-z0-9_\\.-]+)@([a-z0-9_\\.-]+)\\.([a-z\\.]{2,6})";
     private ArrayList<Replace> phonesReplaceList;
-    private List<String> phonesList;
-    private List<String> emailsList;
+    private Set<String> phonesList;
+    private Set<String> emailsList;
     private Scanner scanner;
 
     public ScanerParser() {
@@ -38,8 +39,8 @@ public class ScanerParser {
         this.phonesReplaceList.add(new Replace("(301)", "(321)"));
     }
     private void initLists() {
-        this.phonesList = new ArrayList<String>();
-        this.emailsList = new ArrayList<String>();
+        this.phonesList = new TreeSet<>();
+        this.emailsList = new TreeSet<>();
     }
 
     private String replace(String line) {
@@ -89,11 +90,11 @@ public class ScanerParser {
         return s.getBytes();
     }
 
-    public List<String> getPhonesList() {
+    public Set<String> getPhonesList() {
         return phonesList;
     }
 
-    public List<String> getEmailsList() {
+    public Set<String> getEmailsList() {
         return emailsList;
     }
     

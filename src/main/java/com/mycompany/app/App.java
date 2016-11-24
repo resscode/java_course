@@ -5,7 +5,9 @@ import com.mycompany.archive.ZipUnArchiveStream;
 import com.mycompany.archive.ZipUnzipper;
 import com.mycompany.parser.ScanerParser;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.zip.ZipFile;
 
 /**
@@ -17,6 +19,8 @@ public class App {
     private static final String INPUT_ZIP_FILE = "D:\\inputs.zip";
     private static final String OUTPUT_ZIP_FILE = "D:\\output.zip";
     private static final String OUTPUT_FOLDER = "D:\\outputzip";
+    private static final String PHONES_FILE = "phones.txt";
+    private static final String EMAILS_FILE = "emails.txt";
 
     public static void main(String[] args) {
         String zipFile = INPUT_ZIP_FILE;
@@ -32,9 +36,9 @@ public class App {
             ScanerParser scanerParser = new ScanerParser();
             ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream, scanerParser);
             zipUnzipper.unzip(destinationFolder);
+            zipUnzipper.addListFile(scanerParser.getEmailsList(), EMAILS_FILE, OUTPUT_FOLDER);
+            zipUnzipper.addListFile(scanerParser.getPhonesList(), PHONES_FILE, OUTPUT_FOLDER);
             zipUnzipper.closeZip();
-            Runnable r = (List<String> list) -> {};
-            for(String row : )
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

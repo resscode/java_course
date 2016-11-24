@@ -12,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -32,10 +34,28 @@ public class ZipUnzipper implements Unzipper {
         this.zipArchiveStream = zipArchiveStream;
         this.scanerParser = scanerParser;
     }
-    public void closeZip() throws IOException{
+
+    public void closeZip() throws IOException {
         this.zipArchiveStream.close();
     }
-    public boolean unzip(String destinationFolder ) {
+
+    public void addListFile(Set set, String fileName, String folder) throws IOException {
+        Function<Set<String>, String> compileString = (Set<String> list) -> {
+            String fileContent = "";
+            fileContent = list.stream().map((row) -> row + System.getProperty("line.separator")).reduce(fileContent, String::concat);
+            return fileContent;
+        };
+        byte[] output = compileString.apply(set).getBytes();
+        File file = new File(folder + File.separator + fileName);
+        this.zipArchiveStream.putNextEntry(new ZipEntry(fileName));
+        FileOutputStream fOutput = new FileOutputStream(file);
+        fOutput.write(output);
+        this.zipArchiveStream.write(output);
+        this.zipArchiveStream.closeEntry();
+        fOutput.close();
+    }
+
+    public boolean unzip(String destinationFolder) {
         File directory = new File(destinationFolder);
 
         // if the output directory doesn't exist, create it
@@ -50,41 +70,43 @@ public class ZipUnzipper implements Unzipper {
             ZipUnArchiveStream zipInputStream = this.zipUnArchiveStream;
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                try{
-                String entryName = entry.getName();
-                File file = new File(destinationFolder + File.separator + entryName);
-                System.out.println("Unzip file " + entryName + " to " + file.getAbsolutePath());
-                // create the directories of the zip directory
-                if (entry.isDirectory()) {
-                    this.zipArchiveStream.putNextEntry(entry);
-                    this.zipArchiveStream.closeEntry();
-                    File newDir = new File(file.getAbsolutePath());
-                    if (!newDir.exists()) {
-                        boolean success = newDir.mkdirs();
-                        if (success == false) {
-                            System.out.println("Problem creating Folder");
+                try {
+                    String entryName = entry.getName();
+                    File file = new File(destinationFolder + File.separator + entryName);
+                    System.out.println("Unzip file " + entryName + " to " + file.getAbsolutePath());
+                    // create the directories of the zip directory
+                    if (entry.isDirectory()) {
+                        this.zipArchiveStream.putNextEntry(entry);
+                        this.zipArchiveStream.closeEntry();
+                        File newDir = new File(file.getAbsolutePath());
+                        if (!newDir.exists()) {
+                            boolean success = newDir.mkdirs();
+                            if (success == false) {
+                                System.out.println("Problem creating Folder");
+                            }
                         }
-                    }
-                } else if (zipInputStream.isZipFile(entry)) {
-                    String fileWoExt = stripExtension(file.getAbsolutePath());
-                    System.out.println("Zip file " + entryName);
-                    ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(zipInputStream);
-                    ZipArchiveStream zipArchiveStream = new ZipArchiveStream();
-                    ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream, this.scanerParser);
-                    zipUnzipper.unzip(fileWoExt);
-                    this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
-                    zipArchiveStream.close();
-                    this.zipArchiveStream.write(zipArchiveStream.getByteArrayOutputStreamBytes());
-                    this.zipArchiveStream.closeEntry();
-                } else {
-                    this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
-                    FileOutputStream fOutput = new FileOutputStream(file);
-                    int count = 0;
-                    //sourceIs = clone is;
-                    this.scanerParser.setScanner(zipInputStream.getZipInputStream());
-                    byte[] bytesForWrite = scanerParser.changeReturnBytes();
-                    fOutput.write(bytesForWrite);
-                    this.zipArchiveStream.write(bytesForWrite);
+                    } else if (zipInputStream.isZipFile(entry)) {
+                        String fileWoExt = stripExtension(file.getAbsolutePath());
+                        System.out.println("Zip file " + entryName);
+                        ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(zipInputStream);
+                        ZipArchiveStream zipArchiveStream = new ZipArchiveStream();
+                        ZipUnzipper zipUnzipper = new ZipUnzipper(zipUnArchiveStream, zipArchiveStream, this.scanerParser);
+                        zipUnzipper.unzip(fileWoExt);
+                        this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
+                        zipArchiveStream.close();
+                        this.zipArchiveStream.write(zipArchiveStream.getByteArrayOutputStreamBytes());
+                        this.zipArchiveStream.closeEntry();
+                    } else if (zipInputStream.isGZipFile(entry)) {
+                        // uNGZIP - GZIP BACK AND PUT AS FILE ENTRY PLUS ZIP FILE ENTRY
+                    } else {
+                        this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
+                        FileOutputStream fOutput = new FileOutputStream(file);
+                        int count = 0;
+                        //sourceIs = clone is;
+                        this.scanerParser.setScanner(zipInputStream.getZipInputStream());
+                        byte[] bytesForWrite = scanerParser.changeReturnBytes();
+                        fOutput.write(bytesForWrite);
+                        this.zipArchiveStream.write(bytesForWrite);
 //                    while ((count = zipInputStream.read(buffer)) > 0) {
 //                        // Change Bytes here
 //                        ByteParser byteParser = new ByteParser(buffer);
@@ -93,10 +115,10 @@ public class ZipUnzipper implements Unzipper {
 //                        fOutput.write(buffer, 0, count);
 //                        this.zipArchiveStream.write(buffer, 0, (count < buffer.length) ? count : buffer.length);
 //                    }
-                    this.zipArchiveStream.closeEntry();
-                    fOutput.close();
-                }
-                }catch(ZipException ex){
+                        this.zipArchiveStream.closeEntry();
+                        fOutput.close();
+                    }
+                } catch (ZipException ex) {
                     ex.printStackTrace();
                 }
             }
