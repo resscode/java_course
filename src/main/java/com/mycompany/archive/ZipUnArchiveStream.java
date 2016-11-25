@@ -1,20 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.archive;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-//import com.mycompany.stream.ZippedFileInputStream;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -23,15 +15,14 @@ import java.util.zip.ZipInputStream;
  */
 public class ZipUnArchiveStream implements ArchiveStream {
 
-//    private ZippedFileInputStream zippedFileInputStream;
     private ZipFile zipFile;
     private ZipInputStream zipInputStream;
 
-    public ZipUnArchiveStream(ZipUnArchiveStream zipArchiveStream) throws IOException {
+    public ZipUnArchiveStream(ZipUnArchiveStream zipUnArchiveStream) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int len;
-        while ((len = zipArchiveStream.getZipInputStream().read(buffer)) > -1) {
+        while ((len = zipUnArchiveStream.getZipInputStream().read(buffer)) > -1) {
             baos.write(buffer, 0, len);
         }
         baos.flush();
@@ -46,14 +37,7 @@ public class ZipUnArchiveStream implements ArchiveStream {
     public ZipInputStream getZipInputStream() {
         return this.zipInputStream;
     }
-    // TODO move to Dfenition class
-    public boolean isZipFile(ZipEntry entry) throws IOException {
-        return entry.getName().toLowerCase().endsWith(".zip");
-    }
 
-    public boolean isGZipFile(ZipEntry entry) throws IOException {
-        return entry.getName().toLowerCase().endsWith(".gz");
-    }
     // END TODO
     public ZipFile getZipFile() {
         return this.zipFile;

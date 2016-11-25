@@ -1,21 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.archive;
 
-import com.mycompany.parser.ByteParser;
 import com.mycompany.parser.ScanerParser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
@@ -55,6 +48,7 @@ public class ZipUnzipper implements Unzipper {
         fOutput.close();
     }
 
+    @Override
     public boolean unzip(String destinationFolder) {
         File directory = new File(destinationFolder);
 
@@ -85,7 +79,7 @@ public class ZipUnzipper implements Unzipper {
                                 System.out.println("Problem creating Folder");
                             }
                         }
-                    } else if (zipInputStream.isZipFile(entry)) {
+                    } else if (ArchiveDefenition.isZipFile(entry)) {
                         String fileWoExt = stripExtension(file.getAbsolutePath());
                         System.out.println("Zip file " + entryName);
                         ZipUnArchiveStream zipUnArchiveStream = new ZipUnArchiveStream(zipInputStream);
@@ -96,7 +90,14 @@ public class ZipUnzipper implements Unzipper {
                         zipArchiveStream.close();
                         this.zipArchiveStream.write(zipArchiveStream.getByteArrayOutputStreamBytes());
                         this.zipArchiveStream.closeEntry();
-                    } else if (zipInputStream.isGZipFile(entry)) {
+                    } else if (ArchiveDefenition.isGZipFile(entry)) {
+                        String fileWoExt = stripExtension(file.getAbsolutePath());
+                        System.out.println("GZip file " + entryName);
+                        GzipArchiveStream gzipArchiveStream = new GzipArchiveStream();
+                        GzipUnArchiveStream gzipUnArchiveStream = new GzipUnArchiveStream(zipInputStream.getZipInputStream());
+                        GzipUnzipper gzipUnzipper = new GzipUnzipper(gzipUnArchiveStream, gzipArchiveStream, this.zipArchiveStream, this.scanerParser);
+                        gzipUnzipper.unzip(fileWoExt);
+                        zipArchiveStream.close();
                         // uNGZIP - GZIP BACK AND PUT AS FILE ENTRY PLUS ZIP FILE ENTRY
                     } else {
                         this.zipArchiveStream.putNextEntry(new ZipEntry(entryName));
